@@ -1,0 +1,12 @@
+# Venv
+venv/
+# Idea
+.idea/
+# Pycache
+__pycache__
+# Pytest cache
+.pytest_cache/
+# Allure report
+output/
+# Confidential
+config.env
