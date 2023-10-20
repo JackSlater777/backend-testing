@@ -1,0 +1,38 @@
+# Кажется, что генерится автоматически после прогона???
+include:
+  - local: '/base.yml'
+  - local: '/.gitlab-ci.d/schedules/wms-stg.yml'
+  - local: '/.gitlab-ci.d/regression/wms-stg-trigger.yml'
+  - local: '/.gitlab-ci.d/create_launch.yml'
+  - local: '/.gitlab-ci.d/allure_stop.yml'
+
+stages:
+  - create-launch-allure-start
+  - inbound
+#  - outbound
+#  - tmc
+  - pre-build
+  - build
+  - tests
+  - publish
+  - pre-deploy
+  - shift
+  - deploy
+  - canary
+  - e2e
+  - post-deploy
+  - merge
+  - close
+  - allure-stop
+
+create_launch:
+  extends: .create_launch_testops
+  stage: create-launch-allure-start
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && ($RUN_SCHEDULE_MODE == "whc" || $RUN_SCHEDULE_MODE == "oms"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "pipeline" && $CI_PROJECT_NAME == "manual-pipelines"'

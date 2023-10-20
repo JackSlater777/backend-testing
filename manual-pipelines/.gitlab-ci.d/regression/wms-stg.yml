@@ -1,0 +1,10 @@
+include:
+  - local: 'base.yml'
+
+.instances_search:
+  extends: .regression
+  variables:
+    REPORT_PROJECT_NAME: ${CI_PROJECT_NAME}
+    TEST_FOLDER: tests/api/wms/instances-search
+    MESHVERSION: wms-svc-instances-search.wms:${CI_COMMIT_REF_SLUG},wms-svc-instances-search:${CI_COMMIT_REF_SLUG}
+    CHANNEL: wms-test-tmc

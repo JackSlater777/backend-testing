@@ -1,0 +1,24 @@
+.create_launch_testops:
+  image:
+    name: $BASE_IMAGE_REPO}/supply-chain-qa/autotests:base_build_image
+  script:
+    - launch_name=$(echo $CI_PIPELINE_SOURCE $SCHEDULE_MODE $(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M:%S') $GITLAB_USER_LOGIN)
+    - echo $launch_name
+    - allurectl launch create --launch-name "$launch_name" --no-header >> launch_data
+  after_script:
+    - launch_id=$(echo $(tail -n 1 $CI_PROJECT_DIR/launch_data) | sed 's/ .*//')
+    - echo "Launch ID = $launch_id"
+    - TXT_COLOR="\e[93m"
+    - echo -e "
+      ${TXT_COLOR}MESHVERSION:$MESHVERSION\n
+      AUTOTEST_BRANCH:$AUTOTEST_BRANCH\n
+      AUTOTEST_TAG:$AUTOTEST_TAG\n
+      SERVICES:$SERVICES\n
+      PARALLEL_THREADS:$PARALLEL_THREADS\n
+      RETRIES:$RETRIES\n
+      ONLY_LAST_FAILED:$ONLY_LAST_FAILED\n"
+    - allurectl job-run start --launch-id $launch-id
+allow_failure: true
+artifacts:
+  paths:
+    - $CI_PROJECT_DIR/launch_data

@@ -1,0 +1,97 @@
+variables:
+  HTTP_PROXY_ADDRESS: http://proxy.ozon.ru:3128
+  HTTPS_PROXY_ADDRESS: http://proxy.ozon.ru:3128
+  NO_PROXY: .ozon.ru,.ozon,.o3.ru,localhost,127.0.0.1,10.21.3.178
+  ALLURE_REPORT_GROUP: SupplyChain
+  SLACK_HOOK: https://hooks.slack.com/services/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
+  ALLURE_DOMAIN: http://allure.s.o3.ru
+  CEPH_DOMAIN: http://ozallure.prod.s3.ceph.s.o3.ru:7480
+  ALLURE_ENDPOINT_UI: http://allure.o3.ru
+  ONLY_LAST_FAILED: "true"
+  SOURCE_PATH: https://gitlab.ozon.ru/api/v4/projects/1408/repository/files
+  ALLURE_RESULT_DIR: /app/allure_results
+  DEFAULT_CHANNEL: wms-test-run-stg
+  VAULT_SECRET_FILE_S2S: credentials
+
+.integration_testing:
+  image:
+    name: gitlab-registry.ozon.ru/supply-chain-qa/autotests/${AUTOTEST_BRANCH}:${AUTOTEST_TAG}
+    entrypoint: [ "" ]
+  tags:
+    - tests
+    - k8s
+  before_script:
+    - eval "$(cat ./functions.sh)"
+    - load_job_cache
+  script:
+    - echo $CI_PIPELINE_SOURCE
+    - run_tests
+  after_script:
+    - eval "$(cat ./functions.sh)"
+    - generate_executor_json
+    - save_job_cache || exit_code=$?
+    - allure_link="$(send_old_report_per_suite || exit_code=$?)"
+    - echo allure_link
+    - send_message $allure_link
+  cache:
+    key: $CI_JOB_NAME-$CI_PIPELINE_ID
+    paths:
+      - $CI_PROJECT_DIR/$CI_JOB_NAME-$CI_PIPELINE_ID/pytest_cache
+      - $CI_PROJECT_DIR/$CI_JOB_NAME-$CI_PIPELINE_ID/allure_result
+    policy: pull-push
+    when: always
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/launch_data
+    reports:
+      junit: ${CI_PROJECT_DIR}/regression_junit.xml
+    expire_in: 2 days
+    when: always
+  variables:
+    TEST_ENV: stg
+    ENV: stg  # переменная нужна для нового WmsQaBalancer, переменная TEST_ENV возможно тоже
+    ALLURE_JOB_RUN_CHILD: "true"
+    PARALLEL_THREADS: 1
+    RETRIES: 1
+    KUBERNETES_MEMORY_REQUEST: 10Gi
+    KUBERNETES_MEMORY_LIMIT: 32Gi
+  allow_failure: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $SERVICES == null'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($SERVICES != null && $SERVICE =~ $SERVICES)'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $RUN_SCHEDULE_MODE == $SCHEDULE_MODE'
+      when: always
+
+.regression:
+  extends: .integration_testing
+  stage: post-deploy
+  image:
+    name: gitlab-registry.ozon.ru/supply-chain-qa/autotests/master:latest
+    entrypoints: [ "" ]
+  allow_failure: true
+  before_script:
+    - >
+      if [ "$CI_PROJECT_NAME" != "manual-pipelines" ]; then
+        git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/supply-chain-qa/manual-pipelines.git
+        cp -a manual-pipelines/* ./
+      fi
+    - eval "$(cat ./functions.sh)"
+  rules:
+    - if: '$CI_PROJECT_NAME != "manual-pipelines"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH =~ /^release/ || $CI_COMMIT_BRANCH =~ /^hotfix/'
+      when: manual
+
+.regression_template:
+  extends: .integration_testing
+  stage: post-deploy
+  allow_failure: true
+  variables:
+    MESHVERSION: ${SERVICE_NAME}.wms:${VERSION},${SERVICE_NAME}:${VERSION}
+    MANUAL_PIPELINES_PROJECT_NAME: 'manual-pipelines'
+  rules:
+    - if: '$CI_PROJECT_NAME == $MANUAL_PIPELINES_PROJECT_NAME && $CI_PIPELINE_SOURCE == "pipeline"' # && тут должно быть что-то еще
+      when: always
+    - when: never
