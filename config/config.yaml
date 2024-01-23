@@ -1,0 +1,7 @@
+localhost:
+  trading_app:
+    address: "http://localhost:8000"
+  wiremock:
+    address: "https://wiremock-server:1234"
+  fsso:
+    address: "https://to-token:4321"

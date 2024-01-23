@@ -4,7 +4,7 @@
 
 from typing import Union, Optional, Dict, List
 from pydantic import Field, conint
-from src.models.config import Base
+from framework.models.services.config import Base
 
 
 class ContentType(Base):

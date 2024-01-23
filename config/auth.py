@@ -1,5 +1,5 @@
 from framework.service_systems.auth.token import Token
-from config.config import get_credentials_for_bearer_token
+from config.setup_config import get_credentials_for_bearer_token
 
 
 class Auth:

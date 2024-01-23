@@ -8,9 +8,9 @@ RUN python3 -m pip install -r requirements.txt
 
 COPY . .
 
-RUN chmod +x ./scripts/allurectl_windows_amd64 ./scripts/allure_report_sender_bitbucket.sh ./scripts/allure_report_sender_bitbucket.sh
+# RUN chmod +x ./scripts/allurectl_windows_amd64 ./scripts/allure_report_sender_bitbucket.sh ./scripts/allure_report_sender_bitbucket.sh
 
-# CMD pytest tests/functional/* -s -v --alluredir=output/pytest_allure_reports --clean-alluredir
+CMD pytest tests/trading_app/* -s -v --env=localhost --alluredir=output/pytest_allure_reports --clean-alluredir
 
 # ****************************************************************************************************************
 # docker build -t price_calc .

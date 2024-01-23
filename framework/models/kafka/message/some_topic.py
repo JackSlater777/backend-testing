@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from framework.utils.enums import StringableEnum
+from framework.enums.enums import StringableEnum
 
 
 class Type(StringableEnum):
