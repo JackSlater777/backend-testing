@@ -1,15 +1,12 @@
 import requests
-# from config.auth import auth
-# from config.setup_config import get_credentials_for_token
-from config import configuration
 
 
 class TradingAppHttpClient:
-    def __init__(self):
+    def __init__(self, url):
         self.service_name = "trading_app"
-        self.url = configuration.get("trading_app").get("address")
+        self.url = url
 
-    # def auth(self) -> dict:
+        # def auth(self) -> dict:
     #     url = "/auth"
     #     # headers = "Content-Type: application/json"
     #     response = requests.post(url=SERVICE_ONE_BASE_URL + url, json=get_credentials_for_token())

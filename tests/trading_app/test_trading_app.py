@@ -1,16 +1,12 @@
 import allure
-from framework.handlers.http.trading_app import TradingAppHttpClient
 from framework.models.services.trading_app.user import User
 from framework.utils.pydantic.validator import PydanticValidator
 
-# Запуск отдельного класса/теста
+# Запуск отдельного файла/класса/теста
 # pytest tests/trading_app/test_trading_app.py::TestV1GetUsersAll:test_200 -s -v --alluredir=output --clean-alluredir
 
 # Просмотр отчета на локальном сервере
 # allure serve output
-
-
-trading_app_http_client = TradingAppHttpClient()
 
 
 @allure.suite("Get /users/all")
@@ -19,7 +15,7 @@ class TestV1GetUsersAll:
     handler: /users/all
     method: GET
     """
-    def test_200(self):
+    def test_200(self, trading_app_http_client):
         response = trading_app_http_client.v1_get_users_all()
         for user in response:
             PydanticValidator.validate_response_schema(
@@ -33,7 +29,7 @@ class TestV1PostAddUser:
     handler: /add_user
     method: POST
     """
-    def test_200(self):
+    def test_200(self, trading_app_http_client):
         response = trading_app_http_client.v1_post_add_user(role="King", name="Ivan")
         PydanticValidator.validate_response_schema(
             response_schema=User, response=response
@@ -46,7 +42,7 @@ class TestV1PatchChangeUserName:
     handler: /users/{user_id}
     method: PATCH
     """
-    def test_200(self):
+    def test_200(self, trading_app_http_client):
         response = trading_app_http_client.v1_patch_change_user_name(
             user_id=1,
             new_name="Ivan"
