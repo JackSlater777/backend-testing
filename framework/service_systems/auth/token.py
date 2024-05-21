@@ -1,13 +1,13 @@
 import requests
 from http import HTTPStatus
-from config import configuration
 
 
 class Token:
-    def __init__(self):
-        self.url = configuration.get("fsso").get("address")
+    def __init__(self, url):
+        self.service_name = "token"
+        self.url = url
 
-    def get_bearer_token(self, payload: str):
+    def get_bearer_token(self, payload: str) -> dict:
         """Get a bearer_token token"""
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         url = "/auth/realms/APIGW_API/protocol/openid-connect/token"

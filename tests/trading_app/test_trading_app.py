@@ -1,11 +1,13 @@
 import allure
+import pytest
 from framework.models.services.trading_app.user import User
 from framework.utils.pydantic.validator import PydanticValidator
+from http import HTTPStatus
 
-# Запуск отдельного файла/класса/теста
+# Launch file/class/test separately:
 # pytest tests/trading_app/test_trading_app.py::TestV1GetUsersAll:test_200 -s -v --alluredir=output --clean-alluredir
 
-# Просмотр отчета на локальном сервере
+# Launch Allure report on localhost:
 # allure serve output
 
 
@@ -51,17 +53,17 @@ class TestV1PatchChangeUserName:
             response_schema=User, response=response
         )
 
-    # @pytest.mark.parametrize(
-    #     "field", [
-    #         "field_one",
-    #         "field_two",
-    #         "field_three"
-    #     ]
-    # )
-    # def test_400_validation(self, field, v1_handler_one_body):
-    #     """Error 400 - validation error"""
-    #     v1_handler_one_body[field] = None
-    #     ServiceOneHttpClient.v1_handler_one(
-    #         body=v1_handler_one_body,
-    #         expected_status=HTTPStatus.BAD_REQUEST
-    #     )
+    @pytest.mark.parametrize(
+        "value", [123, None]
+    )
+    def test_400(self, value, trading_app_http_client):
+        """Error 400 - validation error"""
+        response = trading_app_http_client.v1_patch_change_user_name(
+            user_id=1,
+            new_name=value,
+            expected_status=HTTPStatus.BAD_REQUEST
+        )
+        # TODO: scheme err400
+        # PydanticValidator.validate_response_schema(
+        #     response_schema=Error400, response=response
+        # )
