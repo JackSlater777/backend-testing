@@ -7,6 +7,9 @@ from config.setup_config import get_credentials_for_bearer_token
 def pytest_addoption(parser) -> None:
     """Declaring the command-line options for test run"""
     parser.addoption("--env", default="localhost")
+    # сюда можно добавлять кастомные аргументы, например логин и пароль (альтернатива env-файлам)
+
+# можно добавить доп.фикстуры с логикой для обработки кастомных аргументов
 
 
 @pytest.fixture(scope="session")

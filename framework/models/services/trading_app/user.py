@@ -10,8 +10,11 @@ class Degree(BaseModel):
     type_degree: DegreeType
 
 
-class User(BaseModel):
-    id: int
+class RequestUser(BaseModel):
     role: str
     name: str
     degree: Optional[list[Degree]] = []
+
+
+class ResponseUser(RequestUser):
+    id: int

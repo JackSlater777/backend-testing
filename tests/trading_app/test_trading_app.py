@@ -1,6 +1,6 @@
 import allure
 import pytest
-from framework.models.services.trading_app.user import User
+from framework.models.services.trading_app.user import RequestUser, ResponseUser
 from framework.utils.pydantic.validator import PydanticValidator
 from http import HTTPStatus
 
@@ -9,6 +9,9 @@ from http import HTTPStatus
 
 # Launch Allure report on localhost:
 # allure serve output
+
+
+# Кейсы показывают примеры разных запросов - с телом (json), с парамсами (
 
 
 @allure.suite("Get /users/all")
@@ -21,7 +24,7 @@ class TestV1GetUsersAll:
         response = trading_app_http_client.v1_get_users_all()
         for user in response:
             PydanticValidator.validate_response_schema(
-                response_schema=User, response=user
+                response_schema=ResponseUser, response=user
             )
 
 
@@ -32,9 +35,17 @@ class TestV1PostAddUser:
     method: POST
     """
     def test_200(self, trading_app_http_client):
-        response = trading_app_http_client.v1_post_add_user(role="King", name="Ivan")
+        # body = RequestUser(
+        #     role="King",
+        #     name="Ivan"
+        # )
+        body = {
+            "role": "King",
+            "name": "Ivan"
+        }
+        response = trading_app_http_client.v1_post_add_user(body=body)
         PydanticValidator.validate_response_schema(
-            response_schema=User, response=response
+            response_schema=ResponseUser, response=response
         )
 
 
@@ -50,7 +61,7 @@ class TestV1PatchChangeUserName:
             new_name="Ivan"
         )
         PydanticValidator.validate_response_schema(
-            response_schema=User, response=response
+            response_schema=ResponseUser, response=response
         )
 
     @pytest.mark.parametrize(
